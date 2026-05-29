@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard Negociación — Plus Antigüedad</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:        #F5F3EE;
+    --surface:   #FFFFFF;
+    --surface2:  #EEF0F4;
+    --border:    #D8D5CE;
+    --text:      #1A1A1A;
+    --muted:     #6B6560;
+    --accent:    #1A3A5C;
+    --accent2:   #2E6DA4;
+    --rojo:      #C0392B;
+    --verde:     #1E7A3A;
+    --naranja:   #C0580A;
+    --amarillo:  #8A6B00;
+    --mono:      'DM Mono', monospace;
+    --sans:      'DM Sans', sans-serif;
+    --display:   'Syne', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    min-height: 100vh;
+    padding: 2rem;
+  }
+
+  /* HEADER */
+  .header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 2px solid var(--accent);
+  }
+  .header-left h1 {
+    font-family: var(--display);
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--accent);
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+  }
+  .header-left p {
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin-top: 0.3rem;
+    font-family: var(--mono);
+  }
+  .empresa-ref {
+    background: var(--naranja);
+    color: white;
+    padding: 0.8rem 1.2rem;
+    border-radius: 6px;
+    text-align: right;
+  }
+  .empresa-ref .label {
+    font-size: 0.65rem;
+    font-family: var(--mono);
+    opacity: 0.85;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .empresa-ref .valor {
+    font-family: var(--display);
+    font-size: 1.4rem;
+    font-weight: 800;
+    line-height: 1.1;
+  }
+  .empresa-ref .sub {
+    font-size: 0.7rem;
+    opacity: 0.85;
+    font-family: var(--mono);
+  }
+
+  /* NUNCA CEDER */
+  .nunca-ceder {
+    background: #FDF0EE;
+    border: 1.5px solid var(--rojo);
+    border-left: 5px solid var(--rojo);
+    border-radius: 6px;
+    padding: 0.8rem 1rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .nunca-ceder .nc-title {
+    font-family: var(--display);
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--rojo);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    white-space: nowrap;
+  }
+  .nunca-ceder .nc-items {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  .nc-item {
+    font-size: 0.72rem;
+    color: var(--rojo);
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+  .nc-item::before { content: '✕'; font-weight: 700; }
+
+  /* LAYOUT PRINCIPAL */
+  .main-grid {
+    display: grid;
+    grid-template-columns: 340px 1fr;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  /* PANEL CONTROLES */
+  .panel {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .panel-header {
+    background: var(--accent);
+    color: white;
+    padding: 0.7rem 1rem;
+    font-family: var(--display);
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .panel-header .badge {
+    background: rgba(255,255,255,0.2);
+    padding: 0.15rem 0.5rem;
+    border-radius: 20px;
+    font-size: 0.65rem;
+  }
+  .panel-body { padding: 1rem; }
+
+  /* SELECTOR OPCIÓN */
+  .opcion-selector {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    margin-bottom: 1.2rem;
+  }
+  .opcion-btn {
+    padding: 0.6rem;
+    border: 1.5px solid var(--border);
+    border-radius: 6px;
+    background: var(--surface2);
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.15s;
+    font-family: var(--display);
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--muted);
+  }
+  .opcion-btn.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: white;
+  }
+  .opcion-btn .ob-label { font-size: 0.6rem; font-weight: 400; opacity: 0.8; display: block; margin-top: 0.15rem; font-family: var(--mono); }
+
+  /* SLIDERS DE TRAMOS */
+  .tramo-section { margin-bottom: 1.2rem; }
+  .tramo-section-title {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    margin-bottom: 0.6rem;
+    padding-bottom: 0.3rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .tramo-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 0.8rem;
+    margin-bottom: 0.7rem;
+  }
+  .tramo-info { }
+  .tramo-name {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    font-weight: 500;
+    color: var(--text);
+  }
+  .tramo-workers {
+    font-size: 0.62rem;
+    color: var(--muted);
+    margin-top: 0.1rem;
+  }
+  .tramo-control {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  input[type=range] {
+    -webkit-appearance: none;
+    width: 120px;
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    outline: none;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px;
+    height: 14px;
+    background: var(--accent);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  input[type=range]::-webkit-slider-thumb:hover { background: var(--accent2); }
+  .pct-display {
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--accent);
+    min-width: 2.5rem;
+    text-align: right;
+  }
+
+  /* SEPARADOR AÑOS */
+  .anos-section { margin-bottom: 1.2rem; }
+  .ano-row {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.6rem;
+  }
+  .ano-label {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    color: var(--muted);
+    min-width: 70px;
+  }
+  input[type=number] {
+    width: 60px;
+    padding: 0.25rem 0.4rem;
+    border: 1.5px solid var(--border);
+    border-radius: 4px;
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    color: var(--text);
+    background: var(--surface2);
+    text-align: center;
+  }
+  input[type=number]:focus { outline: none; border-color: var(--accent2); }
+  .ano-unit { font-size: 0.65rem; color: var(--muted); font-family: var(--mono); }
+
+  /* PANEL RESULTADOS */
+  .resultados-grid {
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    gap: 1rem;
+    height: 100%;
+  }
+
+  /* KPIs */
+  .kpis {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+  }
+  .kpi {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .kpi::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+  }
+  .kpi.kpi-actual::before { background: var(--accent2); }
+  .kpi.kpi-diff::before { background: var(--verde); }
+  .kpi.kpi-mes::before { background: var(--naranja); }
+  .kpi .kpi-label {
+    font-family: var(--mono);
+    font-size: 0.62rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    margin-bottom: 0.4rem;
+  }
+  .kpi .kpi-valor {
+    font-family: var(--display);
+    font-size: 1.5rem;
+    font-weight: 800;
+    line-height: 1;
+    color: var(--text);
+  }
+  .kpi .kpi-sub {
+    font-size: 0.65rem;
+    color: var(--muted);
+    margin-top: 0.3rem;
+    font-family: var(--mono);
+  }
+  .diff-pos { color: var(--rojo) !important; }
+  .diff-neg { color: var(--verde) !important; }
+
+  /* TABLA RESULTADOS */
+  .tabla-wrap {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.78rem;
+  }
+  thead tr {
+    background: var(--accent);
+    color: white;
+  }
+  thead th {
+    padding: 0.6rem 0.8rem;
+    text-align: left;
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  thead th:not(:first-child) { text-align: right; }
+  tbody tr { border-bottom: 1px solid var(--border); transition: background 0.1s; }
+  tbody tr:hover { background: var(--surface2); }
+  tbody tr:last-child { border-bottom: none; font-weight: 600; background: #F0F4F8; }
+  tbody td {
+    padding: 0.55rem 0.8rem;
+    font-family: var(--mono);
+    font-size: 0.72rem;
+  }
+  tbody td:not(:first-child) { text-align: right; }
+  .tramo-tag {
+    display: inline-block;
+    padding: 0.15rem 0.5rem;
+    border-radius: 3px;
+    font-size: 0.62rem;
+    font-weight: 600;
+    background: var(--surface2);
+    color: var(--accent);
+  }
+
+  /* SEMÁFORO */
+  .semaforo {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.8rem;
+  }
+  .sem-item {
+    border-radius: 6px;
+    padding: 0.8rem;
+    border: 1.5px solid transparent;
+  }
+  .sem-verde  { background: #EAF7EE; border-color: var(--verde); }
+  .sem-amarillo { background: #FFFBE6; border-color: var(--amarillo); }
+  .sem-rojo   { background: #FDF0EE; border-color: var(--rojo); }
+  .sem-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 0.4rem;
+    vertical-align: middle;
+  }
+  .sem-verde .sem-dot  { background: var(--verde); }
+  .sem-amarillo .sem-dot { background: var(--amarillo); }
+  .sem-rojo .sem-dot   { background: var(--rojo); }
+  .sem-title {
+    font-family: var(--display);
+    font-size: 0.72rem;
+    font-weight: 700;
+    margin-bottom: 0.4rem;
+    display: flex;
+    align-items: center;
+  }
+  .sem-verde .sem-title  { color: var(--verde); }
+  .sem-amarillo .sem-title { color: var(--amarillo); }
+  .sem-rojo .sem-title   { color: var(--rojo); }
+  .sem-text {
+    font-size: 0.67rem;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  /* ESTADO ACTUAL */
+  .estado-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    font-family: var(--display);
+    font-size: 0.75rem;
+    font-weight: 700;
+    margin-top: 0.5rem;
+  }
+  .estado-verde    { background: #EAF7EE; color: var(--verde); border: 1.5px solid var(--verde); }
+  .estado-amarillo { background: #FFFBE6; color: var(--amarillo); border: 1.5px solid var(--amarillo); }
+  .estado-rojo     { background: #FDF0EE; color: var(--rojo); border: 1.5px solid var(--rojo); }
+
+  /* BARRA VISUAL */
+  .barra-wrap { margin-top: 0.8rem; }
+  .barra-label { font-family: var(--mono); font-size: 0.62rem; color: var(--muted); margin-bottom: 0.3rem; display: flex; justify-content: space-between; }
+  .barra-bg { background: var(--border); border-radius: 4px; height: 8px; position: relative; overflow: visible; }
+  .barra-fill { height: 100%; border-radius: 4px; transition: width 0.4s ease, background 0.4s ease; }
+  .barra-marker {
+    position: absolute;
+    top: -4px;
+    width: 2px;
+    height: 16px;
+    background: var(--naranja);
+    transform: translateX(-50%);
+  }
+  .barra-marker-label {
+    position: absolute;
+    top: 16px;
+    font-family: var(--mono);
+    font-size: 0.55rem;
+    color: var(--naranja);
+    transform: translateX(-50%);
+    white-space: nowrap;
+  }
+
+  /* FOOTER */
+  .footer-nota {
+    background: var(--accent);
+    color: white;
+    padding: 0.7rem 1.2rem;
+    border-radius: 6px;
+    font-size: 0.68rem;
+    font-family: var(--mono);
+    text-align: center;
+    line-height: 1.6;
+    margin-top: 1rem;
+    opacity: 0.9;
+  }
+
+  /* ANIMACIÓN */
+  .kpi-valor { transition: color 0.3s; }
+  .flash { animation: flash 0.3s ease; }
+  @keyframes flash { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  @media (max-width: 900px) {
+    .main-grid { grid-template-columns: 1fr; }
+    .kpis { grid-template-columns: 1fr 1fr; }
+    .semaforo { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-left">
+    <h1>Dashboard Negociación<br>Plus Antigüedad</h1>
+    <p>Reunión martes · Base real · 15 pagas · 55 trabajadores</p>
+  </div>
+  <div class="empresa-ref">
+    <div class="label">Propuesta empresa (fija)</div>
+    <div class="valor">44.100 €/año</div>
+    <div class="sub">3% plano para todos · 15 pagas</div>
+  </div>
+</div>
+
+<!-- NUNCA CEDER -->
+<div class="nunca-ceder">
+  <div class="nc-title">Nunca ceder</div>
+  <div class="nc-items">
+    <span class="nc-item">Base sube con convenio</span>
+    <span class="nc-item">Cláusula NO ABSORBIBLE por escrito</span>
+    <span class="nc-item">Pagas sobre retribución total real</span>
+    <span class="nc-item">Cambios futuros requieren Art. 41 ET</span>
+  </div>
+</div>
+
+<!-- GRID PRINCIPAL -->
+<div class="main-grid">
+
+  <!-- CONTROLES -->
+  <div class="panel">
+    <div class="panel-header">
+      ⚙ Configuración
+      <span class="badge" id="opcion-badge">Opción B</span>
+    </div>
+    <div class="panel-body">
+
+      <!-- SELECTOR OPCIÓN -->
+      <div class="tramo-section-title">Opción de tramos</div>
+      <div class="opcion-selector" style="margin-bottom:1.2rem">
+        <button class="opcion-btn active" id="btn-b" onclick="setOpcion('B')">
+          B — Prioritaria
+          <span class="ob-label">4 / 8 / 16 / 24 años</span>
+        </button>
+        <button class="opcion-btn" id="btn-a" onclick="setOpcion('A')">
+          A — Secundaria
+          <span class="ob-label">4 / 8 / 20 / 28 años</span>
+        </button>
+      </div>
+
+      <!-- AÑOS DE CORTE -->
+      <div class="tramo-section-title">Años de corte por tramo</div>
+      <div class="anos-section">
+        <div class="ano-row">
+          <span class="ano-label">Tramo 1 desde</span>
+          <input type="number" id="t1" value="4" min="1" max="10" onchange="recalc()">
+          <span class="ano-unit">años</span>
+        </div>
+        <div class="ano-row">
+          <span class="ano-label">Tramo 2 desde</span>
+          <input type="number" id="t2" value="8" min="5" max="15" onchange="recalc()">
+          <span class="ano-unit">años</span>
+        </div>
+        <div class="ano-row">
+          <span class="ano-label">Tramo 3 desde</span>
+          <input type="number" id="t3" value="16" min="10" max="25" onchange="recalc()">
+          <span class="ano-unit">años</span>
+        </div>
+        <div class="ano-row">
+          <span class="ano-label">Tramo 4 desde</span>
+          <input type="number" id="t4" value="24" min="15" max="35" onchange="recalc()">
+          <span class="ano-unit">años</span>
+        </div>
+      </div>
+
+      <!-- PORCENTAJES -->
+      <div class="tramo-section-title">Porcentaje por tramo (sobre base real)</div>
+      <div class="tramo-section">
+        <div class="tramo-row" id="row-t1">
+          <div class="tramo-info">
+            <div class="tramo-name" id="label-t1">4 – 8 años</div>
+            <div class="tramo-workers" id="workers-t1">— trabajadores</div>
+          </div>
+          <div class="tramo-control">
+            <input type="range" id="s1" min="0" max="10" step="0.5" value="1" oninput="recalc()">
+            <span class="pct-display" id="v1">1.0%</span>
+          </div>
+        </div>
+        <div class="tramo-row" id="row-t2">
+          <div class="tramo-info">
+            <div class="tramo-name" id="label-t2">8 – 16 años</div>
+            <div class="tramo-workers" id="workers-t2">— trabajadores</div>
+          </div>
+          <div class="tramo-control">
+            <input type="range" id="s2" min="0" max="10" step="0.5" value="4" oninput="recalc()">
+            <span class="pct-display" id="v2">4.0%</span>
+          </div>
+        </div>
+        <div class="tramo-row" id="row-t3">
+          <div class="tramo-info">
+            <div class="tramo-name" id="label-t3">16 – 24 años</div>
+            <div class="tramo-workers" id="workers-t3">— trabajadores</div>
+          </div>
+          <div class="tramo-control">
+            <input type="range" id="s3" min="0" max="10" step="0.5" value="7" oninput="recalc()">
+            <span class="pct-display" id="v3">7.0%</span>
+          </div>
+        </div>
+        <div class="tramo-row" id="row-t4">
+          <div class="tramo-info">
+            <div class="tramo-name" id="label-t4">24+ años</div>
+            <div class="tramo-workers" id="workers-t4">— trabajadores</div>
+          </div>
+          <div class="tramo-control">
+            <input type="range" id="s4" min="0" max="10" step="0.5" value="10" oninput="recalc()">
+            <span class="pct-display" id="v4">10.0%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ESTADO SEMÁFORO -->
+      <div class="tramo-section-title">Estado actual</div>
+      <div id="estado-wrap">
+        <span class="estado-badge estado-verde" id="estado-badge">● VERDE — Sigue negociando</span>
+      </div>
+
+      <!-- BARRA VISUAL -->
+      <div class="barra-wrap">
+        <div class="barra-label">
+          <span>0 €</span>
+          <span id="barra-max-label">70.000 €</span>
+        </div>
+        <div class="barra-bg">
+          <div class="barra-fill" id="barra-fill" style="width:60%;background:var(--verde)"></div>
+          <div class="barra-marker" id="barra-marker" style="left:63%">
+            <span class="barra-marker-label">Empresa 44.100€</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- RESULTADOS -->
+  <div>
+    <!-- KPIs -->
+    <div class="kpis" style="margin-bottom:1rem">
+      <div class="kpi kpi-actual">
+        <div class="kpi-label">Coste anual propuesta</div>
+        <div class="kpi-valor" id="kpi-anual">—</div>
+        <div class="kpi-sub">15 pagas · base real</div>
+      </div>
+      <div class="kpi kpi-diff">
+        <div class="kpi-label">vs Propuesta empresa</div>
+        <div class="kpi-valor" id="kpi-diff">—</div>
+        <div class="kpi-sub" id="kpi-diff-sub">empresa ahorra / paga más</div>
+      </div>
+      <div class="kpi kpi-mes">
+        <div class="kpi-label">Coste mensual extra</div>
+        <div class="kpi-valor" id="kpi-mes">—</div>
+        <div class="kpi-sub">sobre nóminas actuales</div>
+      </div>
+    </div>
+
+    <!-- TABLA DESGLOSE -->
+    <div class="tabla-wrap" style="margin-bottom:1rem">
+      <table>
+        <thead>
+          <tr>
+            <th>Tramo antigüedad</th>
+            <th>Trabajadores</th>
+            <th>Base ref.</th>
+            <th>% plus</th>
+            <th>Plus/mes</th>
+            <th>Coste mes</th>
+            <th>Coste año</th>
+          </tr>
+        </thead>
+        <tbody id="tabla-body">
+        </tbody>
+      </table>
+    </div>
+
+    <!-- SEMÁFORO -->
+    <div class="panel">
+      <div class="panel-header">🚦 Semáforo negociación</div>
+      <div class="panel-body">
+        <div class="semaforo">
+          <div class="sem-item sem-verde">
+            <div class="sem-title"><span class="sem-dot"></span>VERDE — Sigue</div>
+            <div class="sem-text">Ofrecen 3%+ en tramo 8-16a · Aceptan subir base con convenio · Aceptan NO ABSORBIBLE por escrito · Reconocen cuatrienios futuros</div>
+          </div>
+          <div class="sem-item sem-amarillo">
+            <div class="sem-title"><span class="sem-dot"></span>AMARILLO — Aprieta</div>
+            <div class="sem-text">Ofrecen 2%-3% en 8-16a · Aceptan subir con convenio pero no quieren firmarlo · Regatean cuatrienios · Piden plazos nuevos</div>
+          </div>
+          <div class="sem-item sem-rojo">
+            <div class="sem-title"><span class="sem-dot"></span>ROJO — Nos vamos</div>
+            <div class="sem-text">Ofrecen menos del 1% · No ponen NO ABSORBIBLE por escrito · No garantizan subida con convenio · Solo mantener base sin más</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="footer-nota">
+  No firmar el desistimiento hasta tener el acta sellada con cláusula NO ABSORBIBLE &nbsp;|&nbsp;
+  Todo lo que ocurra debe quedar en acta &nbsp;|&nbsp;
+  Si amenazan verbalmente: pedir que lo pongan por escrito &nbsp;|&nbsp;
+  <strong>LA EMPRESA NO QUIERE IR AL JUICIO. ESE ES NUESTRO MAYOR ACTIVO.</strong>
+</div>
+
+<script>
+// DATOS TRABAJADORES: [antiguedad, grupo, base]
+const TRABAJADORES = [
+  [31.32,'V',2200],[30.42,'V',2200],[30.31,'III',1700],[26.21,'V',2200],
+  [23.92,'III',1700],[19.08,'V',2200],[17.79,'IV',1700],[17.67,'III',1700],
+  [17.66,'V',2200],[17.17,'IV',1700],[17.08,'IV',1700],[16.06,'IV',1700],
+  [16.00,'IV',1700],[15.67,'IV',1700],[15.58,'V',2200],[15.08,'V',2200],
+  [14.29,'IV',1700],[10.99,'IV',1700],[10.92,'IV',1700],[10.42,'IV',1700],
+  [10.40,'IV',1700],[9.40,'IV',1700],[9.40,'IV',1700],[9.40,'IV',1700],
+  [9.06,'IV',1700],[9.06,'IV',1700],[9.06,'IV',1700],[8.11,'III',1700],
+  [7.67,'IV',1700],[5.92,'IV',1700],[4.08,'IV',1700],[2.93,'IV',1700],
+  [2.83,'V',2200],[2.58,'IV',1700],[2.42,'IV',1700],[2.42,'IV',1700],
+  [1.94,'IV',1700],[1.50,'IV',1700],[1.42,'IV',1700],[0.99,'IV',1700],
+  [0.67,'IV',1700],[0.26,'IV',1700],[0.08,'V',2200],[0.07,'IV',1700],
+  [18.00,'II',1700],[16.08,'II',1700],[13.67,'I',1700],[11.67,'I',1700],
+  [10.83,'I',1700],[10.25,'I',1700],[6.58,'I',1700],[2.45,'I',1700],
+  [0.86,'I',1700],[0.71,'I',1700],[0.28,'I',1700],
+];
+
+const EMPRESA_ANUAL = 44100;
+const PAGAS = 15;
+
+let opcionActual = 'B';
+
+function setOpcion(op) {
+  opcionActual = op;
+  document.getElementById('btn-a').classList.toggle('active', op === 'A');
+  document.getElementById('btn-b').classList.toggle('active', op === 'B');
+  document.getElementById('opcion-badge').textContent = op === 'B' ? 'Opción B' : 'Opción A';
+
+  if (op === 'B') {
+    document.getElementById('t1').value = 4;
+    document.getElementById('t2').value = 8;
+    document.getElementById('t3').value = 16;
+    document.getElementById('t4').value = 24;
+    document.getElementById('s1').value = 1;
+    document.getElementById('s2').value = 4;
+    document.getElementById('s3').value = 7;
+    document.getElementById('s4').value = 10;
+  } else {
+    document.getElementById('t1').value = 4;
+    document.getElementById('t2').value = 8;
+    document.getElementById('t3').value = 20;
+    document.getElementById('t4').value = 28;
+    document.getElementById('s1').value = 1;
+    document.getElementById('s2').value = 4;
+    document.getElementById('s3').value = 7;
+    document.getElementById('s4').value = 10;
+  }
+  recalc();
+}
+
+function fmt(n) {
+  return n.toLocaleString('es-ES', {minimumFractionDigits:0, maximumFractionDigits:0}) + ' €';
+}
+
+function recalc() {
+  const t1 = parseFloat(document.getElementById('t1').value);
+  const t2 = parseFloat(document.getElementById('t2').value);
+  const t3 = parseFloat(document.getElementById('t3').value);
+  const t4 = parseFloat(document.getElementById('t4').value);
+
+  const p1 = parseFloat(document.getElementById('s1').value) / 100;
+  const p2 = parseFloat(document.getElementById('s2').value) / 100;
+  const p3 = parseFloat(document.getElementById('s3').value) / 100;
+  const p4 = parseFloat(document.getElementById('s4').value) / 100;
+
+  // Actualizar displays de %
+  document.getElementById('v1').textContent = (p1*100).toFixed(1) + '%';
+  document.getElementById('v2').textContent = (p2*100).toFixed(1) + '%';
+  document.getElementById('v3').textContent = (p3*100).toFixed(1) + '%';
+  document.getElementById('v4').textContent = (p4*100).toFixed(1) + '%';
+
+  // Labels tramos
+  document.getElementById('label-t1').textContent = `${t1} – ${t2} años`;
+  document.getElementById('label-t2').textContent = `${t2} – ${t3} años`;
+  document.getElementById('label-t3').textContent = `${t3} – ${t4} años`;
+  document.getElementById('label-t4').textContent = `${t4}+ años`;
+
+  // Función que devuelve pct según antigüedad
+  function getPct(ant) {
+    if (ant >= t4) return p4;
+    if (ant >= t3) return p3;
+    if (ant >= t2) return p2;
+    if (ant >= t1) return p1;
+    return 0;
+  }
+
+  // Calcular tramos
+  const tramos = [
+    { label: `< ${t1} años`, min: 0, max: t1, pct: 0 },
+    { label: `${t1} – ${t2} años`, min: t1, max: t2, pct: p1 },
+    { label: `${t2} – ${t3} años`, min: t2, max: t3, pct: p2 },
+    { label: `${t3} – ${t4} años`, min: t3, max: t4, pct: p3 },
+    { label: `${t4}+ años`, min: t4, max: 999, pct: p4 },
+  ];
+
+  let totalMes = 0;
+  let totalAnual = 0;
+  const filas = [];
+
+  for (const tr of tramos) {
+    const tws = TRABAJADORES.filter(t => t[0] >= tr.min && t[0] < tr.max);
+    const n = tws.length;
+    if (n === 0 && tr.pct === 0 && tr.min === 0) {
+      // sin plus — mostrar igualmente
+    }
+    const bases = tws.map(t => t[2]);
+    const baseRef = bases.length > 0 ? (bases.reduce((a,b)=>a+b,0)/bases.length) : 0;
+    const plusMes = baseRef * tr.pct;
+    const costeMes = tws.reduce((s, t) => s + t[2] * tr.pct, 0);
+    const costeAno = costeMes * PAGAS;
+    totalMes += costeMes;
+    totalAnual += costeAno;
+    filas.push({ label: tr.label, n, baseRef, pct: tr.pct, plusMes, costeMes, costeAno });
+  }
+
+  // Actualizar contadores de trabajadores
+  document.getElementById('workers-t1').textContent = filas[1].n + ' trabajadores';
+  document.getElementById('workers-t2').textContent = filas[2].n + ' trabajadores';
+  document.getElementById('workers-t3').textContent = filas[3].n + ' trabajadores';
+  document.getElementById('workers-t4').textContent = filas[4].n + ' trabajadores';
+
+  // KPIs
+  const diff = totalAnual - EMPRESA_ANUAL;
+  const signo = diff >= 0 ? '+' : '';
+  document.getElementById('kpi-anual').textContent = fmt(totalAnual);
+  document.getElementById('kpi-diff').textContent = signo + fmt(diff);
+  document.getElementById('kpi-diff').className = 'kpi-valor ' + (diff > 0 ? 'diff-pos' : 'diff-neg');
+  document.getElementById('kpi-diff-sub').textContent = diff > 0 ? 'empresa paga más que su oferta' : 'empresa ahorra vs su oferta';
+  document.getElementById('kpi-mes').textContent = fmt(totalMes);
+
+  // Tabla
+  const tbody = document.getElementById('tabla-body');
+  tbody.innerHTML = '';
+  for (const f of filas) {
+    const tr = document.createElement('tr');
+    const baseStr = f.n > 0 ? fmt(Math.round(f.baseRef)) : '—';
+    const plusStr = f.pct > 0 && f.n > 0 ? fmt(Math.round(f.plusMes)) : f.pct === 0 ? 'Sin plus' : '—';
+    tr.innerHTML = `
+      <td><span class="tramo-tag">${f.label}</span></td>
+      <td>${f.n}</td>
+      <td>${baseStr}</td>
+      <td>${f.pct > 0 ? (f.pct*100).toFixed(1)+'%' : '—'}</td>
+      <td>${plusStr}</td>
+      <td>${fmt(Math.round(f.costeMes))}</td>
+      <td>${fmt(Math.round(f.costeAno))}</td>
+    `;
+    tbody.appendChild(tr);
+  }
+  // Fila total
+  const trTotal = document.createElement('tr');
+  trTotal.innerHTML = `
+    <td><strong>TOTAL</strong></td>
+    <td><strong>55</strong></td>
+    <td>—</td>
+    <td>—</td>
+    <td>—</td>
+    <td><strong>${fmt(Math.round(totalMes))}</strong></td>
+    <td><strong>${fmt(Math.round(totalAnual))}</strong></td>
+  `;
+  tbody.appendChild(trTotal);
+
+  // Estado semáforo
+  const badge = document.getElementById('estado-badge');
+  const pctTramo2 = p2 * 100;
+  let estado, cls, txt;
+  if (pctTramo2 >= 3 && totalAnual <= EMPRESA_ANUAL * 1.15) {
+    estado = 'verde'; cls = 'estado-verde'; txt = '● VERDE — Sigue negociando';
+  } else if (pctTramo2 >= 2) {
+    estado = 'amarillo'; cls = 'estado-amarillo'; txt = '◐ AMARILLO — Aprieta más';
+  } else {
+    estado = 'rojo'; cls = 'estado-rojo'; txt = '■ ROJO — Nos levantamos';
+  }
+  badge.className = 'estado-badge ' + cls;
+  badge.textContent = txt;
+
+  // Barra visual
+  const maxVal = Math.max(totalAnual * 1.3, EMPRESA_ANUAL * 1.5);
+  const fillPct = Math.min((totalAnual / maxVal) * 100, 100);
+  const markerPct = (EMPRESA_ANUAL / maxVal) * 100;
+  document.getElementById('barra-fill').style.width = fillPct + '%';
+  document.getElementById('barra-fill').style.background = diff > 0 ? 'var(--rojo)' : 'var(--verde)';
+  document.getElementById('barra-marker').style.left = markerPct + '%';
+  document.getElementById('barra-max-label').textContent = fmt(Math.round(maxVal));
+}
+
+// Init
+recalc();
+</script>
+</body>
+</html>
